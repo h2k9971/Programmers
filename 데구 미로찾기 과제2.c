@@ -1,7 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include<stdio.h>
 #include<stdlib.h>
-#include<Windows.h> //gotoxy() 함수를 사용하기 위한 헤더
 
 #define m 12
 #define p 12
@@ -37,18 +36,11 @@ void push(listPointer* top, ty_element item);
 
 void reverse_stack(listPointer* top);
 
-listNode top;
-
 offsets move1[Max_dir] = {{-1,0}, {-1,1}, {0,1}, {1,1},{1,0}, {1,-1}, {0,-1}, {-1,-1}};
 
 int maze[m+2][p+2];
 int mark[m+2][p+2];// 방문여부
 
-void gotoxy(int x, int y)
-{
-    COORD Pos = {x ,y};
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Pos);
-}
 
 int path(int sy, int sx, int dy, int dx)
 {
@@ -60,24 +52,11 @@ int path(int sy, int sx, int dy, int dx)
     
     ty_element position;
     
-    listNode *top = NULL;
+    listPointer top = NULL;
     
     if (maze[sy][sx] == 1 || maze[dy][dx] == 1) {
         printf("입력오류: 출발점이나 목표점이 막힌 셀입니다.\n");
         return 0;
-    }
-
-    // 먼저 미로를 화면에 그린다.
-    CONSOLE_SCREEN_BUFFER_INFO presentCur;
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &presentCur);
-    basex = presentCur.dwCursorPosition.X; // 기준점의 좌표의 x.
-    basey = presentCur.dwCursorPosition.Y; // 기준점의 좌표의 y.
-    
-    for (i = 0; i < m + 2; i++) {
-        for (j = 0; j < p + 2; j++) {
-            gotoxy(j + basex, i + basey);
-            printf("%1d", maze[i][j]);
-        }
     }
     
     position.row = sy;
@@ -94,10 +73,7 @@ int path(int sy, int sx, int dy, int dx)
     }
     
     mark[sy][sx] = 1;
-    
-    gotoxy(sx + basex, sy + basey);
-    Sleep(Timestep);
-    printf(">");
+
     
     while(top != NULL && !found)
     {
@@ -115,8 +91,6 @@ int path(int sy, int sx, int dy, int dx)
             if(nextRow == EXIT_ROW && nextCol == EXIT_COL)
             {
                 found = TRUE;
-                gotoxy(nextCol + basex, nextRow + basey);
-                printf("<");
                 break;
             }
             else if(!maze[nextRow][nextCol] && !mark[nextRow][nextCol])
@@ -128,22 +102,15 @@ int path(int sy, int sx, int dy, int dx)
                 push(&top, position);
                 row = nextRow;
                 col = nextCol;
-                gotoxy(col + basex, row + basey);
-                printf("*");
-                Sleep(Timestep);
                 dir =0;
             }
             else ++dir;
         }
         if(found)
             break;
-        
-        gotoxy(col + basex, row + basey);
-        printf("%c", '$');
-        Sleep(Timestep);
-    }
     
-    gotoxy(0, basey + m + 2);
+    }
+
     printf("\n");
     
     position.row = row;
